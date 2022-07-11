@@ -59,7 +59,7 @@ class RobotGraph(wx.Frame):
 # end of class RobotGraph
 
 class DeviceDataList(wx.MDIChildFrame):
-    def __init__(self, *args, **kwds):
+    def __init__(self,mqttc : MQTTClientClass,*args, **kwds):
         # begin wxGlade: DeviceDataList.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
         wx.MDIChildFrame.__init__(self, *args, **kwds)
@@ -199,7 +199,7 @@ class DeviceDataList(wx.MDIChildFrame):
 # end of class DeviceDataList
 
 class RED_Algolism_Controler(wx.Frame):
-    def __init__(self,mqttc : MQTTClientClass,*args, **kwds):
+    def __init__(self, mqttc : MQTTClientClass,*args, **kwds): 
         
         # begin wxGlade: RED_Algolism_Controler.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
@@ -224,6 +224,11 @@ class RED_Algolism_Controler(wx.Frame):
         self.panel_2 = wx.Panel(self.notebook_1, wx.ID_ANY)
         self.panel_2.SetBackgroundColour(wx.Colour(255, 244, 244))
         self.notebook_1.AddPage(self.panel_2, _("Title"))
+
+        #定期的な更新(ms)
+        self.panel_2.timer = wx.Timer(self)
+        self.panel_2.Bind(wx.EVT_TIMER, self.refresh)
+        self.panel_2.timer.Start(100)
 
         sizer_19 = wx.BoxSizer(wx.VERTICAL)
 
@@ -261,9 +266,6 @@ class RED_Algolism_Controler(wx.Frame):
         self.combo_box_1.SetSelection(0)
         sizer_22.Add(self.combo_box_1, 0, 0, 0)
 
-        self.refresh = wx.Button(self.Algorithm_Mode, wx.ID_ANY, _(u"更新"))
-        self.refresh.SetMinSize((46, 23))
-        sizer_22.Add(self.refresh, 0, wx.ALIGN_CENTER_VERTICAL | wx.FIXED_MINSIZE, 0)
         sizer_23 = wx.BoxSizer(wx.HORIZONTAL)
         sizer_3.Add(sizer_23, 0, wx.ALL | wx.EXPAND, 1)
 
@@ -436,10 +438,6 @@ class RED_Algolism_Controler(wx.Frame):
         self.combo_box_7.SetSelection(0)
         sizer_35.Add(self.combo_box_7, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 0)
 
-        self.refresh_copy = wx.Button(self.panel_3, wx.ID_ANY, _(u"更新"))
-        self.refresh_copy.SetMinSize((46, 23))
-        sizer_35.Add(self.refresh_copy, 0, wx.ALIGN_CENTER_VERTICAL | wx.FIXED_MINSIZE, 0)
-
         grid_sizer_1 = wx.GridSizer(3, 3, 0, 0)
         sizer_20.Add(grid_sizer_1, 1, wx.ALL | wx.EXPAND, 5)
 
@@ -588,9 +586,7 @@ class RED_Algolism_Controler(wx.Frame):
 
         self.Layout()
 
-        self.refresh.Bind(wx.EVT_BUTTON, self.RefreshDeviceList)
         self.button_3.Bind(wx.EVT_BUTTON, self.SendParameters)
-        self.refresh_copy.Bind(wx.EVT_BUTTON, self.RefreshDeviceList)
         self.button_5.Bind(wx.EVT_BUTTON, self.RadiconForward)
         self.button_7.Bind(wx.EVT_BUTTON, self.RadiconLeft)
         self.button_8.Bind(wx.EVT_BUTTON, self.RadiconStop)
@@ -647,9 +643,9 @@ class RED_Algolism_Controler(wx.Frame):
         self.window.ShowModal()
         
         event.Skip()
-    def RefreshDeviceList(self, event):
+    def refresh(self, event): # 定期的に自動で呼び出される関数。表示パラメータを更新する。
         print("Device list refresh.")
-
+    
     def RadiconForward(self, event):  # wxGlade: RED_Algolism_Controler.<event_handler>
         print("Event handler 'RadiconForward' not implemented!")
         event.Skip()
